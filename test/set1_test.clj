@@ -4,9 +4,13 @@
 (def mushroom-hex   "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d")
 (def mushroom-base64 "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t")
 
+(defn does-round-trip [x back convert]
+  (is (= x (back (convert x)))))
+
 (deftest conversions
   (is (= mushroom-base64 (bytes-to-base64 (hex-to-bytes mushroom-hex))))
-  (is (= mushroom-hex (bytes-to-hex (hex-to-bytes mushroom-hex))))
+  (does-round-trip mushroom-hex bytes-to-hex hex-to-bytes)
+  (does-round-trip mushroom-base64 bytes-to-base64 base64-to-bytes)
   (is (= (bytes-to-string (hex-to-bytes mushroom-hex)) 
      "I'm killing your brain like a poisonous mushroom")))
 
@@ -32,7 +36,7 @@
 
 
 
-(def p4-input (load-hex-line-file "4.txt"))
+(def p4-input (load-hex-line-file "resources/4.txt"))
 
 (deftest solve-xor
   (is (= 88 (first (solve-xor-cipher (hex-to-bytes p3-input)))))
@@ -42,13 +46,13 @@
   (is (= 37 (hamming-distance (string-to-bytes "this is a test")
                               (string-to-bytes "wokka wokka!!!")))))
 
-(def p6-input (slurp-no-newlines "6.txt"))
+(def p6-input (slurp-no-newlines "resources/6.txt"))
 
 (deftest crack-repeating-xor
   (is (= "Terminator X: Bring the noise" 
          (bytes-to-string (crack-repeating-key-xor (base64-to-bytes p6-input))))))
 
-(def p7-input (slurp-no-newlines "7.txt"))
+(def p7-input (slurp-no-newlines "resources/7.txt"))
 (def p7-key "YELLOW SUBMARINE")
 
 (deftest aes
@@ -58,7 +62,7 @@
                                     (string-to-bytes p7-key))) 
                  0 8))))
 
-(def p8-input (load-hex-line-file "8.txt"))
+(def p8-input (load-hex-line-file "resources/8.txt"))
 
 (deftest module-tests
   (is (= 4 (number-of-duplicate-blocks (detect-ecb-mode p8-input)))))

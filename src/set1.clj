@@ -1,6 +1,6 @@
 (ns set1
-  (:require [clojure.test :as t] clojure.set [clojure.string :as s])
-  (:import java.util.Base64))
+  (:require  [clojure.set :refer [intersection]] [clojure.string :as s])
+  (:import java.util.Base64 javax.crypto.spec.SecretKeySpec javax.crypto.Cipher))
 
 (defn hex-char-to-int [^Character c]
   (if (Character/isDigit c)
@@ -37,20 +37,11 @@
       (map key)
       (take n)))
 
-(def letter-frequencies 
-{\a 0.08167 \b 0.01492 \c 0.02782 \d 0.04253 \e 0.12702 \f 0.02228 \g 0.02015 
- \h 0.06094 \i 0.06966 \j 0.00153 \k 0.00772 \l 0.04025 \m 0.02406 \n 0.06749 
- \o 0.07507 \p 0.01929 \q 9.5e-4 \r 0.05987 \s 0.06327 \t 0.09056 \u 0.02758 
- \v 0.00978 \w 0.0236 \x 0.0015 \y 0.01974 \z 7.4e-4})
-
-(defn map-on-map-vals [f m]
-  (zipmap (keys m) (map f (vals m))))
-
 (def etaoin-shrdlu (into #{} "etaoin "))
 
 (defn score-text [string]
   (let [most-freq (most-frequent-characters string (count etaoin-shrdlu))]
-    (- (count (clojure.set/intersection etaoin-shrdlu (into #{} most-freq)))
+    (- (count (intersection etaoin-shrdlu (into #{} most-freq)))
        (count (into #{} (filter #(not (Character/isLetter ^Character %)) string)))) ))
 
 (defn string-to-bytes [s]
@@ -70,8 +61,6 @@
 (defn best-score [xors]
   (apply max-key (fn [[b t]] (score-text t)) xors))
 
-(def b (hex-to-bytes "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"))
-
 (defn solve-xor-cipher [b]
   (best-score (all-xors b)))
 
@@ -90,9 +79,9 @@
 
 
 (defn aes-decrypt [input-bytes key-bytes]
-  (let [k (javax.crypto.spec.SecretKeySpec. (byte-array key-bytes) "AES")
-        cipher (doto (javax.crypto.Cipher/getInstance "AES/ECB/PKCS5Padding")
-           (.init javax.crypto.Cipher/DECRYPT_MODE k))]
+  (let [k (SecretKeySpec. (byte-array key-bytes) "AES")
+        cipher (doto (Cipher/getInstance "AES/ECB/PKCS5Padding")
+           (.init Cipher/DECRYPT_MODE k))]
     (.doFinal cipher (byte-array input-bytes))))
 
 
