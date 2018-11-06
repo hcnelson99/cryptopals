@@ -2,15 +2,6 @@
   (:require  [clojure.set :refer [intersection]] [clojure.string :as s])
   (:import java.util.Base64 javax.crypto.spec.SecretKeySpec javax.crypto.Cipher))
 
-(defn hex-char-to-int [^Character c]
-  (if (Character/isDigit c)
-    (- (int c) (int \0))
-    (+ (- (int (Character/toLowerCase c)) (int \a)) 
-       10)))
-
-(defn hex-pair-to-byte [[l h]]
-  (+ (* h 16) l))
-
 (defn hex-to-bytes [hex]
   (->> hex
       (partition 2)
